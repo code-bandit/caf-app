@@ -10,6 +10,7 @@ import restaurantsRoutes from "./routes/restaurants.routes.js";
 import menuItemsRoutes from "./routes/menuItems.routes.js";
 import complaintsRoutes from "./routes/complaints.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
+import historyRoutes from "./routes/history.routes.js";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/restaurants", restaurantsRoutes);
 app.use("/api/menu-items", menuItemsRoutes);
 app.use("/api/complaints", complaintsRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/history", historyRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
