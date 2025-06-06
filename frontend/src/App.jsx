@@ -13,6 +13,11 @@ import ItemInfo from "./pages/customer/ItemInfo.jsx";
 import Search from "./pages/customer/Search.jsx";
 import History from "./pages/customer/History.jsx";
 import Complaints from "./pages/customer/Complaints.jsx";
+import Dashboard from "./pages/admin/Dashboard.jsx";
+import ItemForm from "./pages/admin/ItemForm.jsx";
+import ItemList from "./pages/admin/ItemList.jsx";
+import AdminComplaints from "./pages/admin/AdminComplaints.jsx";
+import AdminHistory from "./pages/admin/AdminHistory.jsx";
 
 export default function App() {
   return (
@@ -31,6 +36,17 @@ export default function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/history" element={<History />} />
           <Route path="/complaints/new" element={<Complaints />} />
+        </Route>
+
+        <Route element={<ProtectedRoute role="admin" />}>
+          <Route path="/admin/home" element={<Dashboard />} />
+          <Route path="/admin/items" element={<ItemList />} />
+          <Route path="/admin/items/new" element={<ItemForm mode="create" />} />
+          <Route path="/admin/items/:id/edit" element={<ItemForm mode="edit" />} />
+          <Route path="/admin/complaints" element={<AdminComplaints />} />
+          <Route path="/admin/history" element={<AdminHistory />} />
+          <Route path="/admin/notifications" element={<Notifications />} />
+          <Route path="/admin/profile" element={<Profile />} />
         </Route>
 
         <Route element={<ProtectedRoute />}>
