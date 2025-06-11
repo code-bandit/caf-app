@@ -40,7 +40,7 @@ export default function TwoFactor() {
   };
 
   return (
-    <div className="screen">
+    <div className="screen narrow-screen">
       <div style={{ textAlign: "center", marginBottom: 20 }}>
         <Logo />
       </div>

@@ -27,7 +27,7 @@ export default function Onboarding() {
   const isLast = step === SLIDES.length - 1;
 
   return (
-    <div className="screen" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div className="screen narrow-screen" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <div style={{ marginBottom: 40 }}>
         <Logo />
       </div>
