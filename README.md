@@ -51,7 +51,23 @@ npm run dev
 ```
 
 You'll need a local Postgres instance and a `DATABASE_URL` pointing at it;
-apply `backend/src/db/schema.sql` to create the schema.
+apply `backend/src/db/schema.sql` (and optionally `backend/src/db/seed.sql`
+for demo data) to create the schema.
+
+## Demo accounts
+
+Seeded via `backend/src/db/seed.sql` (password for all: `Password123!`):
+
+| Role  | Identifier                         | Restaurant     |
+| ----- | ----------------------------------- | -------------- |
+| Admin | `admin@doubleportion.cafapp.test`   | Double Portion |
+| Admin | `admin@foodmart.cafapp.test`        | FoodMart       |
+| Admin | `admin@mannapalace.cafapp.test`     | Manna Palace   |
+| Customer | `customer@cafapp.test`           | —              |
+
+Login always requires a second step: a 6-digit verification code is logged
+to the backend console (`[2FA] verification code for ...`) since no real
+email/SMS provider is wired up in development.
 
 ## Design
 
