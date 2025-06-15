@@ -12,7 +12,7 @@ export default function ItemList() {
   useEffect(load, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Remove this item from your menu?")) return;
+    if (!window.confirm("Remove this item from your menu?")) return;
     await deleteItem(id);
     load();
   };
@@ -37,12 +37,17 @@ export default function ItemList() {
               <p>₦{Number(item.price).toLocaleString()} · {item.category === "drink" ? "Drink" : "Main dish"}</p>
             </div>
             <div style={{ display: "flex", gap: 10, fontSize: 13 }}>
-              <a onClick={() => navigate(`/admin/items/${item.id}/edit`)} style={{ cursor: "pointer" }}>
+              <button type="button" className="link-btn" onClick={() => navigate(`/admin/items/${item.id}/edit`)}>
                 Edit
-              </a>
-              <a onClick={() => handleDelete(item.id)} style={{ cursor: "pointer", color: "var(--color-danger)" }}>
+              </button>
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => handleDelete(item.id)}
+                style={{ color: "var(--color-danger)" }}
+              >
                 Delete
-              </a>
+              </button>
             </div>
           </div>
         ))}

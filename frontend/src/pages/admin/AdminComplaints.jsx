@@ -34,9 +34,9 @@ export default function AdminComplaints() {
               {new Date(c.created_at).toLocaleString()}
             </p>
             {c.status === "open" && (
-              <a onClick={() => resolve(c.id)} style={{ cursor: "pointer", fontSize: 13 }}>
+              <button type="button" className="link-btn" style={{ fontSize: 13 }} onClick={() => resolve(c.id)}>
                 Mark as resolved
-              </a>
+              </button>
             )}
           </div>
         ))}

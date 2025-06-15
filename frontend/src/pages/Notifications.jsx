@@ -28,7 +28,9 @@ export default function Notifications() {
         <div className="section-header" style={{ margin: "0 0 20px" }}>
           <h1 className="page-title" style={{ marginBottom: 0 }}>Notifications</h1>
           {notifications.some((n) => !n.is_read) && (
-            <a onClick={handleReadAll} style={{ cursor: "pointer" }}>Mark all read</a>
+            <button type="button" className="link-btn" onClick={handleReadAll}>
+              Mark all read
+            </button>
           )}
         </div>
 

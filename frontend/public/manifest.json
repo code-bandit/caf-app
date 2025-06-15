@@ -1,0 +1,9 @@
+{
+  "short_name": "CafApp",
+  "name": "CafApp",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#f5821f",
+  "background_color": "#faf9f7"
+}

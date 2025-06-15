@@ -52,9 +52,13 @@ export default function Profile() {
       <div className="screen">
         <div className="section-header" style={{ margin: "0 0 30px" }}>
           <h1 className="page-title" style={{ marginBottom: 0 }}>Profile</h1>
-          <a onClick={() => (editing ? handleSave() : setEditing(true))} style={{ cursor: "pointer" }}>
+          <button
+            type="button"
+            className="link-btn"
+            onClick={() => (editing ? handleSave() : setEditing(true))}
+          >
             {editing ? (saving ? "Saving…" : "Save") : "Edit"}
-          </a>
+          </button>
         </div>
 
         <div style={{ textAlign: "center", fontSize: 64, marginBottom: 30 }}>👤</div>
