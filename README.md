@@ -8,7 +8,7 @@ availability, update queue status and maintain their menu.
 
 ## Tech stack
 
-- **Frontend:** React (Vite), React Router
+- **Frontend:** React (Create React App), React Router
 - **Backend:** Node.js, Express
 - **Database:** PostgreSQL
 - **Auth:** JWT access + refresh tokens, with a two-factor verification step
@@ -34,7 +34,7 @@ caf-app/
    ```
 
 3. The API is available at `http://localhost:4000/api` and the client at
-   `http://localhost:5173`.
+   `http://localhost:3000`.
 
 ### Running locally without Docker
 
