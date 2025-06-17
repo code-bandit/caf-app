@@ -42,17 +42,19 @@ caf-app/
 # backend
 cd backend
 npm install
-npm run dev
+npm run backend
 
 # frontend (separate terminal)
 cd frontend
 npm install
-npm run dev
+npm start
 ```
 
-You'll need a local Postgres instance and a `DATABASE_URL` pointing at it;
-apply `backend/src/db/schema.sql` (and optionally `backend/src/db/seed.sql`
-for demo data) to create the schema.
+You'll need a local Postgres instance and a `DATABASE_URL` pointing at it
+in `backend/.env` (see `.env.example`); apply `backend/src/db/schema.sql`
+(and optionally `backend/src/db/seed.sql` for demo data) to create the
+schema. `backend/.env` is gitignored, so each environment configures its
+own connection string.
 
 ## Demo accounts
 
