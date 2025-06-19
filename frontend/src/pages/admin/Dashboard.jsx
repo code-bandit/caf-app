@@ -32,9 +32,11 @@ export default function Dashboard() {
       <div className="hero-panel">
         <div className="top-bar" style={{ marginBottom: 24 }}>
           <Logo light />
-          <span className="avatar">🏛️</span>
+          <span className="avatar">
+            <img src="/icons/building.png" alt="" />
+          </span>
         </div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, marginBottom: 8 }}>Dashboard</h1>
+        <h1 style={{ fontWeight: 600, fontSize: 26, marginBottom: 8 }}>Dashboard</h1>
         <span
           style={{
             background: "rgba(255,255,255,0.2)",
@@ -59,7 +61,7 @@ export default function Dashboard() {
             cursor: "pointer",
           }}
         >
-          <strong style={{ fontSize: 18 }}>Online</strong>
+          <strong style={{ fontSize: 24, fontWeight: 600 }}>Online</strong>
           <p style={{ margin: "4px 0 0", opacity: 0.8, fontSize: 13 }}>Active</p>
         </div>
         <div
@@ -72,7 +74,7 @@ export default function Dashboard() {
             cursor: "pointer",
           }}
         >
-          <strong style={{ fontSize: 18 }}>Offline</strong>
+          <strong style={{ fontSize: 24, fontWeight: 600 }}>Offline</strong>
           <p style={{ margin: "4px 0 0", opacity: 0.8, fontSize: 13 }}>Inactive</p>
         </div>
 
@@ -83,7 +85,7 @@ export default function Dashboard() {
 
         {items.slice(0, 5).map((item) => (
           <div key={item.id} className="restaurant-card">
-            <div className="restaurant-thumb">{item.category === "drink" ? "🥤" : "🍽️"}</div>
+            <div className="dish-thumb" style={{ width: 56, height: 56, aspectRatio: "auto" }} />
             <div className="restaurant-meta">
               <h3>{item.name}</h3>
               <p>{item.category === "drink" ? "Drink" : "Main dish"} · updated {new Date(item.updated_at).toLocaleDateString()}</p>

@@ -18,7 +18,7 @@ export default function AdminHistory() {
 
         {entries.map((entry) => (
           <div key={entry.id} className="restaurant-card">
-            <div className="restaurant-thumb">🍽️</div>
+            <div className="dish-thumb" style={{ width: 56, height: 56, aspectRatio: "auto" }} />
             <div className="restaurant-meta">
               <h3>{entry.item_name}</h3>
               <p>

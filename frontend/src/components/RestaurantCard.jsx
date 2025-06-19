@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 export default function RestaurantCard({ restaurant }) {
   return (
     <Link to={`/restaurants/${restaurant.id}`} className="restaurant-card">
-      <div className="restaurant-thumb">🏛️</div>
+      <div className="restaurant-thumb">
+        <img src="/icons/building.png" alt="" />
+      </div>
       <div className="restaurant-meta">
         <h3>{restaurant.name}</h3>
         <p>

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import DishCard from "../../components/DishCard.jsx";
 import QueueStatusBar from "../../components/QueueStatusBar.jsx";
 import BottomNav from "../../components/BottomNav.jsx";
+import BackLink from "../../components/BackLink.jsx";
 import { getRestaurant } from "../../api/restaurants.api.js";
 import { listByRestaurant } from "../../api/menuItems.api.js";
 
 export default function RestaurantDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState(null);
   const [mainDishes, setMainDishes] = useState([]);
   const [drinks, setDrinks] = useState([]);
@@ -27,16 +27,14 @@ export default function RestaurantDetail() {
     <>
       <div className="screen">
         <div className="top-bar">
-          <span className="back-link" onClick={() => navigate(-1)} style={{ cursor: "pointer" }}>
-            ← Back
-          </span>
+          <BackLink />
           <Link to={`/complaints/new?restaurantId=${restaurant.id}`} className="btn btn-primary" style={{ width: "auto", padding: "10px 16px", fontSize: 13 }}>
             Log a complaint
           </Link>
         </div>
 
-        <div className="restaurant-thumb" style={{ width: "100%", height: 160, fontSize: 48, marginBottom: 18 }}>
-          🏛️
+        <div className="restaurant-thumb" style={{ width: "100%", height: 160, marginBottom: 18 }}>
+          <img src="/icons/building.png" alt="" />
         </div>
 
         <h1 className="page-title" style={{ marginBottom: 12 }}>{restaurant.name}</h1>

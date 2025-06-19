@@ -61,7 +61,9 @@ export default function Profile() {
           </button>
         </div>
 
-        <div style={{ textAlign: "center", fontSize: 64, marginBottom: 30 }}>👤</div>
+        <div style={{ textAlign: "center", marginBottom: 30 }}>
+          <img src="/icons/avatar-large.png" alt="" style={{ width: 96, height: 96 }} />
+        </div>
 
         {FIELDS.map(({ key, label, readOnly }) => (
           <div className="field" key={key}>

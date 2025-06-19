@@ -34,7 +34,7 @@ export default function Onboarding() {
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
         <div style={{ fontSize: 96, marginBottom: 24 }}>{slide.emoji}</div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26 }}>{slide.title}</h1>
+        <h1 style={{ fontWeight: 600, fontSize: 26 }}>{slide.title}</h1>
         <p style={{ color: "var(--color-text-secondary)" }}>{slide.body}</p>
       </div>
 

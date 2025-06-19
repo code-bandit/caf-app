@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import BottomNav from "../../components/BottomNav.jsx";
+import BackLink from "../../components/BackLink.jsx";
 import { createComplaint } from "../../api/complaints.api.js";
 
 export default function Complaints() {
@@ -9,7 +10,6 @@ export default function Complaints() {
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,9 +25,7 @@ export default function Complaints() {
   return (
     <>
       <div className="screen">
-        <span className="back-link" onClick={() => navigate(-1)} style={{ cursor: "pointer" }}>
-          ← Back
-        </span>
+        <BackLink />
         <h1 className="page-title">Log a Complaint</h1>
 
         {sent ? (

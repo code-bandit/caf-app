@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import BottomNav from "../../components/BottomNav.jsx";
+import BackLink from "../../components/BackLink.jsx";
 import { getItem } from "../../api/menuItems.api.js";
 import { createHistoryEntry } from "../../api/history.api.js";
 
 export default function ItemInfo() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [ordering, setOrdering] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -32,13 +32,9 @@ export default function ItemInfo() {
   return (
     <>
       <div className="screen">
-        <span className="back-link" onClick={() => navigate(-1)} style={{ cursor: "pointer" }}>
-          ← Back
-        </span>
+        <BackLink />
 
-        <div className="restaurant-thumb" style={{ width: "100%", height: 220, fontSize: 64, marginBottom: 18 }}>
-          {item.category === "drink" ? "🥤" : "🍽️"}
-        </div>
+        <div className="dish-thumb" style={{ width: "100%", aspectRatio: "auto", height: 220, marginBottom: 18 }} />
 
         <h1 className="page-title" style={{ marginBottom: 6 }}>{item.name}</h1>
         <p className="price" style={{ fontSize: 18, marginBottom: 18 }}>

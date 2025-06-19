@@ -44,7 +44,7 @@ export default function Notifications() {
             onClick={() => !n.is_read && handleRead(n.id)}
             style={{ cursor: n.is_read ? "default" : "pointer" }}
           >
-            <span style={{ fontSize: 20 }}>{n.type === "spam" ? "⚠️" : "🔔"}</span>
+            <img src="/icons/bell.png" alt="" style={{ width: 20, height: 20, opacity: n.type === "spam" ? 0.4 : 0.85 }} />
             <div>
               <strong style={{ display: "block", marginBottom: 2 }}>{n.title}</strong>
               <span style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>{n.message}</span>

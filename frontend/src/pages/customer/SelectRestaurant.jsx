@@ -21,18 +21,16 @@ export default function SelectRestaurant() {
         <div className="top-bar" style={{ marginBottom: 30 }}>
           <Logo light />
           <Link to="/profile" className="avatar">
-            👤
+            <img src="/icons/profile.png" alt="Profile" />
           </Link>
         </div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 24, maxWidth: 260 }}>
+        <h1 style={{ fontWeight: 600, fontSize: 24, maxWidth: 260 }}>
           Make your meal choices based on instant availability
         </h1>
       </div>
 
       <div className="screen" style={{ paddingTop: 24 }}>
-        <h2 className="page-title" style={{ fontSize: 20 }}>
-          Select Restaurant
-        </h2>
+        <h2 className="page-title">Select Restaurant</h2>
 
         {loading && <p className="empty-state">Loading restaurants…</p>}
         {!loading && restaurants.length === 0 && (

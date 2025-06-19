@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BottomNav from "../../components/BottomNav.jsx";
+import BackLink from "../../components/BackLink.jsx";
 import { getItem, createItem, updateItem } from "../../api/menuItems.api.js";
 
 const emptyForm = { name: "", description: "", price: "", image_url: "", category: "main_dish" };
@@ -45,12 +46,14 @@ export default function ItemForm({ mode }) {
   return (
     <>
       <div className="screen">
-        <span className="back-link" onClick={() => navigate(-1)} style={{ cursor: "pointer" }}>
-          ← Back
-        </span>
+        <BackLink />
         <h1 className="page-title">{mode === "edit" ? "Update Item" : "Add Item"}</h1>
 
         <form onSubmit={handleSubmit}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginBottom: 24 }}>
+            <img src="/icons/add-picture.png" alt="" style={{ width: 56, height: 56, opacity: 0.8 }} />
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 14 }}>Add Picture</span>
+          </div>
           <div className="field">
             <input placeholder="Image URL" value={form.image_url} onChange={update("image_url")} />
           </div>

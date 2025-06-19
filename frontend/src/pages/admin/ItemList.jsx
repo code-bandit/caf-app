@@ -31,7 +31,7 @@ export default function ItemList() {
 
         {items.map((item) => (
           <div key={item.id} className="restaurant-card">
-            <div className="restaurant-thumb">{item.category === "drink" ? "🥤" : "🍽️"}</div>
+            <div className="dish-thumb" style={{ width: 56, height: 56, aspectRatio: "auto" }} />
             <div className="restaurant-meta">
               <h3>{item.name}</h3>
               <p>₦{Number(item.price).toLocaleString()} · {item.category === "drink" ? "Drink" : "Main dish"}</p>

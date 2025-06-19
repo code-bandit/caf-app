@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import DishCard from "../../components/DishCard.jsx";
 import BottomNav from "../../components/BottomNav.jsx";
+import BackLink from "../../components/BackLink.jsx";
 import { listByRestaurant } from "../../api/menuItems.api.js";
 
 export default function AllDishes() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category") || undefined;
-  const navigate = useNavigate();
   const [items, setItems] = useState([]);
 
   useEffect(() => {
@@ -18,9 +18,7 @@ export default function AllDishes() {
   return (
     <>
       <div className="screen">
-        <span className="back-link" onClick={() => navigate(-1)} style={{ cursor: "pointer" }}>
-          ← Back
-        </span>
+        <BackLink />
         <h1 className="page-title">{category === "drink" ? "All Drinks" : "All Dishes"}</h1>
 
         <div className="dish-grid">
