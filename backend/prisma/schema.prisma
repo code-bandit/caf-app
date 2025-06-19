@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  customer
+  admin
+
+  @@map("user_role")
+}
+
+enum RestaurantStatus {
+  online
+  offline
+
+  @@map("restaurant_status")
+}
+
+enum QueueLevel {
+  low
+  medium
+  high
+
+  @@map("queue_level")
+}
+
+enum MenuCategory {
+  main_dish
+  drink
+
+  @@map("menu_category")
+}
+
+enum ComplaintStatus {
+  open
+  resolved
+
+  @@map("complaint_status")
+}
+
+enum NotificationType {
+  normal
+  spam
+
+  @@map("notification_type")
+}
+
+enum OrderStatus {
+  pending
+  completed
+  cancelled
+
+  @@map("order_status")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  role         UserRole @default(customer)
+  name         String   @db.VarChar(120)
+  email        String   @unique @db.VarChar(160)
+  phone        String?  @db.VarChar(30)
+  username     String   @unique @db.VarChar(60)
+  gender       String?  @db.VarChar(20)
+  address      String?  @db.VarChar(255)
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  restaurant     Restaurant?
+  complaints     Complaint[]
+  notifications  Notification[]
+  history        History[]
+  refreshTokens  RefreshToken[]
+  twoFactorCodes TwoFactorCode[]
+
+  @@map("users")
+}
+
+model Restaurant {
+  id          Int              @id @default(autoincrement())
+  adminId     Int              @unique @map("admin_id")
+  name        String           @db.VarChar(150)
+  imageUrl    String?          @map("image_url")
+  opensAt     DateTime         @default(dbgenerated("'08:00:00'")) @map("opens_at") @db.Time()
+  closesAt    DateTime         @default(dbgenerated("'21:00:00'")) @map("closes_at") @db.Time()
+  status      RestaurantStatus @default(offline)
+  queueStatus QueueLevel       @default(low) @map("queue_status")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  admin     User        @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  menuItems MenuItem[]
+  complaints Complaint[]
+  history   History[]
+
+  @@map("restaurants")
+}
+
+model MenuItem {
+  id           Int          @id @default(autoincrement())
+  restaurantId Int          @map("restaurant_id")
+  category     MenuCategory @default(main_dish)
+  name         String       @db.VarChar(150)
+  description  String?
+  price        Decimal      @db.Decimal(10, 2)
+  imageUrl     String?      @map("image_url")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  history    History[]
+
+  @@map("menu_items")
+}
+
+model Complaint {
+  id           Int             @id @default(autoincrement())
+  customerId   Int             @map("customer_id")
+  restaurantId Int             @map("restaurant_id")
+  message      String
+  status       ComplaintStatus @default(open)
+  createdAt    DateTime        @default(now()) @map("created_at")
+
+  customer   User       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@map("complaints")
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int              @map("user_id")
+  title     String           @db.VarChar(150)
+  message   String
+  type      NotificationType @default(normal)
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model History {
+  id           Int         @id @default(autoincrement())
+  customerId   Int         @map("customer_id")
+  restaurantId Int         @map("restaurant_id")
+  menuItemId   Int         @map("menu_item_id")
+  quantity     Int         @default(1)
+  status       OrderStatus @default(completed)
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  customer   User       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@map("history")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model TwoFactorCode {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  codeHash  String   @map("code_hash")
+  expiresAt DateTime @map("expires_at")
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("two_factor_codes")
+}
