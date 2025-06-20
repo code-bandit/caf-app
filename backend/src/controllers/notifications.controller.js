@@ -1,27 +1,31 @@
-import { query } from "../db/pool.js";
+import { prisma } from "../db/prismaClient.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { HttpError } from "../utils/httpError.js";
+import { toSnakeCase } from "../utils/caseConvert.js";
 
 export const listMine = asyncHandler(async (req, res) => {
-  const result = await query(
-    "SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC",
-    [req.user.id]
-  );
-  res.json({ notifications: result.rows });
+  const notifications = await prisma.notification.findMany({
+    where: { userId: req.user.id },
+    orderBy: { createdAt: "desc" },
+  });
+  res.json({ notifications: toSnakeCase(notifications) });
 });
 
 export const markRead = asyncHandler(async (req, res) => {
-  const result = await query(
-    "UPDATE notifications SET is_read = true WHERE id = $1 AND user_id = $2 RETURNING *",
-    [req.params.id, req.user.id]
-  );
-  if (!result.rowCount) {
+  const notificationId = Number(req.params.id);
+  const { count } = await prisma.notification.updateMany({
+    where: { id: notificationId, userId: req.user.id },
+    data: { isRead: true },
+  });
+  if (!count) {
     throw new HttpError(404, "Notification not found");
   }
-  res.json({ notification: result.rows[0] });
+
+  const notification = await prisma.notification.findUnique({ where: { id: notificationId } });
+  res.json({ notification: toSnakeCase(notification) });
 });
 
 export const markAllRead = asyncHandler(async (req, res) => {
-  await query("UPDATE notifications SET is_read = true WHERE user_id = $1", [req.user.id]);
+  await prisma.notification.updateMany({ where: { userId: req.user.id }, data: { isRead: true } });
   res.status(204).send();
 });

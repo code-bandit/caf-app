@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
-import { query } from "../db/pool.js";
+import { prisma } from "../db/prismaClient.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { HttpError } from "../utils/httpError.js";
 import { requireFields, isValidEmail } from "../utils/validators.js";
+import { toSnakeCase } from "../utils/caseConvert.js";
 import {
   signAccessToken,
   generateRefreshToken,
@@ -12,9 +13,9 @@ import {
 } from "../services/token.service.js";
 import { generateOtp, hashOtp, compareOtp, deliverOtp } from "../services/otp.service.js";
 
-function toSafeUser(row) {
-  const { password_hash, ...safe } = row;
-  return safe;
+function toSafeUser(user) {
+  const { passwordHash, ...safe } = user;
+  return toSnakeCase(safe);
 }
 
 export const signup = asyncHandler(async (req, res) => {
@@ -31,27 +32,26 @@ export const signup = asyncHandler(async (req, res) => {
     requireFields(req.body, ["businessName"]);
   }
 
-  const existing = await query("SELECT id FROM users WHERE email = $1 OR username = $2", [email, username]);
-  if (existing.rowCount > 0) {
+  const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { username }] } });
+  if (existing) {
     throw new HttpError(409, "An account with that email or username already exists");
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const inserted = await query(
-    `INSERT INTO users (role, name, email, phone, username, gender, address, password_hash)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING *`,
-    [role, name, email, phone || null, username, gender || null, address || null, passwordHash]
-  );
-  const user = inserted.rows[0];
-
-  if (role === "admin") {
-    await query(
-      `INSERT INTO restaurants (admin_id, name) VALUES ($1, $2)`,
-      [user.id, businessName]
-    );
-  }
+  const user = await prisma.user.create({
+    data: {
+      role,
+      name,
+      email,
+      phone: phone || null,
+      username,
+      gender: gender || null,
+      address: address || null,
+      passwordHash,
+      ...(role === "admin" ? { restaurant: { create: { name: businessName } } } : {}),
+    },
+  });
 
   res.status(201).json({ user: toSafeUser(user) });
 });
@@ -60,26 +60,23 @@ export const login = asyncHandler(async (req, res) => {
   const { role = "customer", identifier, password } = req.body;
   requireFields(req.body, ["identifier", "password"]);
 
-  const result = await query(
-    "SELECT * FROM users WHERE role = $1 AND (email = $2 OR username = $2)",
-    [role, identifier]
-  );
-  const user = result.rows[0];
+  const user = await prisma.user.findFirst({
+    where: { role, OR: [{ email: identifier }, { username: identifier }] },
+  });
   if (!user) {
     throw new HttpError(401, "Invalid credentials");
   }
 
-  const passwordMatches = await bcrypt.compare(password, user.password_hash);
+  const passwordMatches = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatches) {
     throw new HttpError(401, "Invalid credentials");
   }
 
   const { code, expiresAt } = generateOtp();
   const codeHash = await hashOtp(code);
-  await query(
-    `INSERT INTO two_factor_codes (user_id, code_hash, expires_at) VALUES ($1, $2, $3)`,
-    [user.id, codeHash, expiresAt]
-  );
+  await prisma.twoFactorCode.create({
+    data: { userId: user.id, codeHash, expiresAt },
+  });
   deliverOtp(user, code);
 
   res.json({ requiresTwoFactor: true, userId: user.id });
@@ -89,33 +86,28 @@ export const verifyTwoFactor = asyncHandler(async (req, res) => {
   const { userId, code } = req.body;
   requireFields(req.body, ["userId", "code"]);
 
-  const result = await query(
-    `SELECT * FROM two_factor_codes
-     WHERE user_id = $1 AND consumed = false AND expires_at > now()
-     ORDER BY created_at DESC LIMIT 1`,
-    [userId]
-  );
-  const record = result.rows[0];
+  const record = await prisma.twoFactorCode.findFirst({
+    where: { userId: Number(userId), consumed: false, expiresAt: { gt: new Date() } },
+    orderBy: { createdAt: "desc" },
+  });
   if (!record) {
     throw new HttpError(401, "Verification code has expired, please sign in again");
   }
 
-  const valid = await compareOtp(code, record.code_hash);
+  const valid = await compareOtp(code, record.codeHash);
   if (!valid) {
     throw new HttpError(401, "Incorrect verification code");
   }
 
-  await query("UPDATE two_factor_codes SET consumed = true WHERE id = $1", [record.id]);
+  await prisma.twoFactorCode.update({ where: { id: record.id }, data: { consumed: true } });
 
-  const userResult = await query("SELECT * FROM users WHERE id = $1", [userId]);
-  const user = userResult.rows[0];
+  const user = await prisma.user.findUnique({ where: { id: Number(userId) } });
 
   const accessToken = signAccessToken(user);
   const { raw, hash, expiresAt } = generateRefreshToken();
-  await query(
-    `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`,
-    [user.id, hash, expiresAt]
-  );
+  await prisma.refreshToken.create({
+    data: { userId: user.id, tokenHash: hash, expiresAt },
+  });
 
   res.cookie(REFRESH_COOKIE_NAME, raw, refreshCookieOptions());
   res.json({ accessToken, user: toSafeUser(user) });
@@ -128,28 +120,23 @@ export const refresh = asyncHandler(async (req, res) => {
   }
 
   const hash = hashToken(raw);
-  const result = await query(
-    `SELECT * FROM refresh_tokens
-     WHERE token_hash = $1 AND revoked = false AND expires_at > now()`,
-    [hash]
-  );
-  const record = result.rows[0];
+  const record = await prisma.refreshToken.findFirst({
+    where: { tokenHash: hash, revoked: false, expiresAt: { gt: new Date() } },
+  });
   if (!record) {
     res.clearCookie(REFRESH_COOKIE_NAME, refreshCookieOptions());
     throw new HttpError(401, "Refresh token is invalid or expired");
   }
 
-  await query("UPDATE refresh_tokens SET revoked = true WHERE id = $1", [record.id]);
+  await prisma.refreshToken.update({ where: { id: record.id }, data: { revoked: true } });
 
-  const userResult = await query("SELECT * FROM users WHERE id = $1", [record.user_id]);
-  const user = userResult.rows[0];
+  const user = await prisma.user.findUnique({ where: { id: record.userId } });
 
   const accessToken = signAccessToken(user);
   const next = generateRefreshToken();
-  await query(
-    `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`,
-    [user.id, next.hash, next.expiresAt]
-  );
+  await prisma.refreshToken.create({
+    data: { userId: user.id, tokenHash: next.hash, expiresAt: next.expiresAt },
+  });
 
   res.cookie(REFRESH_COOKIE_NAME, next.raw, refreshCookieOptions());
   res.json({ accessToken, user: toSafeUser(user) });
@@ -159,7 +146,7 @@ export const logout = asyncHandler(async (req, res) => {
   const raw = req.cookies?.[REFRESH_COOKIE_NAME];
   if (raw) {
     const hash = hashToken(raw);
-    await query("UPDATE refresh_tokens SET revoked = true WHERE token_hash = $1", [hash]);
+    await prisma.refreshToken.updateMany({ where: { tokenHash: hash }, data: { revoked: true } });
   }
   res.clearCookie(REFRESH_COOKIE_NAME, refreshCookieOptions());
   res.status(204).send();

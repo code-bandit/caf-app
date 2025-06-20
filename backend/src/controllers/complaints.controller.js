@@ -1,39 +1,47 @@
-import { query } from "../db/pool.js";
+import { prisma } from "../db/prismaClient.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { HttpError } from "../utils/httpError.js";
 import { requireFields } from "../utils/validators.js";
+import { toSnakeCase } from "../utils/caseConvert.js";
 
 export const createComplaint = asyncHandler(async (req, res) => {
   requireFields(req.body, ["restaurantId", "message"]);
   const { restaurantId, message } = req.body;
 
-  const result = await query(
-    `INSERT INTO complaints (customer_id, restaurant_id, message)
-     VALUES ($1, $2, $3) RETURNING *`,
-    [req.user.id, restaurantId, message]
-  );
-  res.status(201).json({ complaint: result.rows[0] });
+  const complaint = await prisma.complaint.create({
+    data: { customerId: req.user.id, restaurantId: Number(restaurantId), message },
+  });
+  res.status(201).json({ complaint: toSnakeCase(complaint) });
 });
 
 export const listMyComplaints = asyncHandler(async (req, res) => {
-  const result = await query(
-    `SELECT c.*, r.name AS restaurant_name FROM complaints c
-     JOIN restaurants r ON r.id = c.restaurant_id
-     WHERE c.customer_id = $1 ORDER BY c.created_at DESC`,
-    [req.user.id]
-  );
-  res.json({ complaints: result.rows });
+  const complaints = await prisma.complaint.findMany({
+    where: { customerId: req.user.id },
+    include: { restaurant: { select: { name: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  res.json({
+    complaints: complaints.map(({ restaurant, ...c }) => ({
+      ...toSnakeCase(c),
+      restaurant_name: restaurant.name,
+    })),
+  });
 });
 
 export const listForMyRestaurant = asyncHandler(async (req, res) => {
-  const result = await query(
-    `SELECT c.*, u.name AS customer_name FROM complaints c
-     JOIN restaurants r ON r.id = c.restaurant_id
-     JOIN users u ON u.id = c.customer_id
-     WHERE r.admin_id = $1 ORDER BY c.created_at DESC`,
-    [req.user.id]
-  );
-  res.json({ complaints: result.rows });
+  const complaints = await prisma.complaint.findMany({
+    where: { restaurant: { adminId: req.user.id } },
+    include: { customer: { select: { name: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  res.json({
+    complaints: complaints.map(({ customer, ...c }) => ({
+      ...toSnakeCase(c),
+      customer_name: customer.name,
+    })),
+  });
 });
 
 export const updateComplaintStatus = asyncHandler(async (req, res) => {
@@ -42,15 +50,15 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
     throw new HttpError(400, "Status must be 'open' or 'resolved'");
   }
 
-  const result = await query(
-    `UPDATE complaints c SET status = $1
-     FROM restaurants r
-     WHERE c.id = $2 AND c.restaurant_id = r.id AND r.admin_id = $3
-     RETURNING c.*`,
-    [status, req.params.id, req.user.id]
-  );
-  if (!result.rowCount) {
+  const complaintId = Number(req.params.id);
+  const { count } = await prisma.complaint.updateMany({
+    where: { id: complaintId, restaurant: { adminId: req.user.id } },
+    data: { status },
+  });
+  if (!count) {
     throw new HttpError(404, "Complaint not found");
   }
-  res.json({ complaint: result.rows[0] });
+
+  const complaint = await prisma.complaint.findUnique({ where: { id: complaintId } });
+  res.json({ complaint: toSnakeCase(complaint) });
 });
