@@ -10,7 +10,7 @@ availability, update queue status and maintain their menu.
 
 - **Frontend:** React (Create React App), React Router
 - **Backend:** Node.js, Express
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL via Prisma ORM
 - **Auth:** JWT access + refresh tokens, with a two-factor verification step
   on login
 - **Infra:** Docker & Docker Compose
@@ -19,7 +19,9 @@ availability, update queue status and maintain their menu.
 
 ```
 caf-app/
-  backend/     Express API, Postgres schema, auth, business logic
+  backend/
+    prisma/    schema.prisma, migrations, seed.js
+    src/       Express API, auth, business logic
   frontend/    React client (customer + admin experiences)
   docker-compose.yml
 ```
@@ -50,15 +52,21 @@ npm install
 npm start
 ```
 
-You'll need a local Postgres instance and a `DATABASE_URL` pointing at it
-in `backend/.env` (see `.env.example`); apply `backend/src/db/schema.sql`
-(and optionally `backend/src/db/seed.sql` for demo data) to create the
-schema. `backend/.env` is gitignored, so each environment configures its
-own connection string.
+You'll need a local Postgres instance and a `DATABASE_URL` pointing at it in
+`backend/.env` (see `.env.example`; `backend/.env` itself is gitignored, so
+each environment configures its own connection string). Then, from
+`backend/`:
+
+```bash
+npx prisma migrate deploy   # apply migrations (use `prisma:migrate` for a new dev migration)
+npx prisma db seed          # load demo data
+```
+
+`npx prisma studio` opens a browser UI for inspecting/editing data directly.
 
 ## Demo accounts
 
-Seeded via `backend/src/db/seed.sql` (password for all: `Password123!`):
+Seeded via `backend/prisma/seed.js` (password for all: `Password123!`):
 
 | Role  | Identifier                         | Restaurant     |
 | ----- | ----------------------------------- | -------------- |
